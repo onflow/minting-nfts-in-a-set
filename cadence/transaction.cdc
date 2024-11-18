@@ -3,32 +3,27 @@ import NonFungibleToken from 0x02
 
 transaction {
 
-    let adminCheck: auth(AdminEntitlement) &SetAndSeries.Admin
-    let seriesRef: &SetAndSeries.Series
-    let receiver: &{NonFungibleToken.CollectionPublic}
+let adminCheck: &SetAndSeries.Admin
 
-    prepare(acct: auth(Storage, Capabilities) &Account) {
-        // Borrow the admin reference from storage
-        self.adminCheck = acct.capabilities.storage.borrow<&SetAndSeries.Admin>(
-            from: SetAndSeries.AdminStoragePath
-        ) ?? panic("Could not borrow admin reference")
+let seriesRef: &SetAndSeries.Series
 
-        // Borrow the series reference
-        self.seriesRef = self.adminCheck.borrowSeries(seriesId: 1)
+let receiver: &{NonFungibleToken.CollectionPublic}
 
-        // Borrow the receiver's capability reference
-        self.receiver = acct.capabilities.borrow<&SetAndSeries.Collection{NonFungibleToken.CollectionPublic}>(
-            SetAndSeries.CollectionPublicPath
-        ) ?? panic("Could not borrow capability")
-    }
+  prepare(acct: AuthAccount) {
+   self.adminCheck = acct.borrow<&SetAndSeries.Admin>(from: SetAndSeries.AdminStoragePath)
+  ?? panic("could not borrow admin reference")
 
-    execute {
-        // Mint an NFT and deposit it to the recipient's collection
-        self.seriesRef.mintSetAndSeriesNFT(
-            recipient: self.receiver,
-            tokenId: 1,
-            setId: 1
-        )
-        log("Minted NFT in account 1")
-    }
+  self.seriesRef = self.adminCheck.borrowSeries(seriesId: 1)
+
+  self.receiver = acct.getCapability<&SetAndSeries.Collection{NonFungibleToken.CollectionPublic}>(SetAndSeries.CollectionPublicPath).borrow()
+  ?? panic("could not borrow capability")
+
+  }
+
+  execute {
+    self.seriesRef.mintSetAndSeriesNFT(recipient: self.receiver , tokenId: 1, setId: 1)
+    log("minted NFT in account 1")
+  }
+
 }
+

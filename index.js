@@ -23,6 +23,6 @@ export const mintingNftsInASet = {
   transactionCode: transactionPath,
   transactionExplanation: transactionExplanationPath,
   filters: {
-    difficulty: "intermediate",
-  },
+    difficulty: "intermediate"
+  }
 };
